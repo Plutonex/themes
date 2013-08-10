@@ -1,6 +1,8 @@
 {
     "name": "plutonex/themes",
-    "description": "",
+    "description": "Theme Managing Library for Laravel 4 php framework",
+    "keywords":["theme","laravel","laravel4","plutonex"],
+    "license":"BSD",
     "authors": [
         {
             "name": "Raftalks",
