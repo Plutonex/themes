@@ -90,8 +90,8 @@ class ThemesServiceProvider extends ServiceProvider {
 	protected function setFilter()
 	{
 		$ThemeLib = $this->app['px.theme'];
-
-		$this->app['router']->after(function($request, $response) use($ThemeLib)
+		$app = $this->app;
+		$this->app['router']->after(function($request, $response) use($ThemeLib, $app)
 		{
 			$themeRules = $this->app['px.themeConfig']->getThemeUriRules();
 
@@ -109,8 +109,8 @@ class ThemesServiceProvider extends ServiceProvider {
 			else
 			{
 				//if no rules are set, sets default theme
-				$this->app['px.themeConfig']->rulesApplied(false);
-				$this->app['px.themeConfig']->setTheme();
+				$app['px.themeConfig']->rulesApplied(false);
+				$app['px.themeConfig']->setTheme();
 			}
 
 			
@@ -125,7 +125,7 @@ class ThemesServiceProvider extends ServiceProvider {
 		    if(is_object($view))
 		    {
 		    	//we will render the view nested to the layout
-		    	$content = $this->app['view']->make($layout)->nest('_content',$view->getName(), $view->getData())->render();
+		    	$content = $app['view']->make($layout)->nest('_content',$view->getName(), $view->getData())->render();
 		    
 		    } else
 		    {
