@@ -19,9 +19,11 @@ class ThemesServiceProvider extends ServiceProvider {
 	 */
 	public function register()
 	{
+		$this->package('plutonex/themes','pxTheme');
+
 		//set theme layout directory
 		$paths = $this->app['config']->get('view.paths');
-		$themePath = $this->app['path.public'] . '/themes/';
+		$themePath = $this->app->config->get('pxTheme::config.themes_path');
 		array_push($paths, $themePath);
 		$this->app['config']->set('view.paths', $paths);
 
@@ -30,18 +32,14 @@ class ThemesServiceProvider extends ServiceProvider {
 		{
 			return new ThemeConfig();
 		});
-	
+
 
 		$this->app->bind('px.theme',function($app)
 		{
 			return new ThemeManager($app['px.themeConfig']);
 		});
 
-		//register ThemeFacade class as alias to "theme"
-		class_alias(__NAMESPACE__ .'\\ThemeFacade', 'pxTheme');
-
-
-		//extend blade engine by adding @px.theme and @px.layout compile function	
+		//extend blade engine by adding @px.theme and @px.layout compile function
 		$this->app['view.engine.resolver']->resolve('blade')->getCompiler()->extend(function($view)
 		{
 			$themePattern = '/(?<!\w)(\s*)@px.theme(\s*\(.*\))/';
@@ -62,7 +60,7 @@ class ThemesServiceProvider extends ServiceProvider {
 			return $view;
 		});
 
-		
+
 	}
 
 
@@ -113,7 +111,7 @@ class ThemesServiceProvider extends ServiceProvider {
 				$app['px.themeConfig']->setTheme();
 			}
 
-			
+
 			$layout = $ThemeLib->getLayoutPath();
 
 			// Redirects have no content and errors should handle their own layout.
@@ -126,18 +124,17 @@ class ThemesServiceProvider extends ServiceProvider {
 		    {
 		    	//we will render the view nested to the layout
 		    	$content = $app['view']->make($layout)->nest('_content',$view->getName(), $view->getData())->render();
-		    
+
 		    } else
 		    {
 		    	//when response is returned without a view, we set no themes
 		    	$content = $view;
 		    }
-		    
-		    $response->setContent($content);	
+
+		    $response->setContent($content);
 
 		});
 
 	}
-
 
 }
