@@ -93,6 +93,10 @@ class ThemesServiceProvider extends ServiceProvider {
 		{
 			$themeRules = $this->app['px.themeConfig']->getThemeUriRules();
 
+			//Support AJAX and pJax
+			$HTTP_X_PJAX  = $request->server->get('HTTP_X_PJAX');
+			$AJAX = ($request->ajax()) ? TRUE : $HTTP_X_PJAX;
+
 			if(!empty($themeRules))
 			{
 				foreach($themeRules as $pattern => $option)
@@ -108,9 +112,21 @@ class ThemesServiceProvider extends ServiceProvider {
 			{
 				//if no rules are set, sets default theme
 				$app['px.themeConfig']->rulesApplied(false);
-				$app['px.themeConfig']->setTheme();
-			}
 
+				$ajax_support = $app->config->get('pxTheme::config.ajax_support');
+
+				if ($AJAX && $ajax_support)
+				{
+					$_layout = $app->config->get('pxTheme::config.ajax_layout');
+
+					$app['px.themeConfig']->setLayout($_layout);
+					$app['px.themeConfig']->setTheme();
+				}
+				else
+				{
+					$app['px.themeConfig']->setTheme();
+				}
+			}
 
 			$layout = $ThemeLib->getLayoutPath();
 
@@ -125,7 +141,8 @@ class ThemesServiceProvider extends ServiceProvider {
 		    	//we will render the view nested to the layout
 		    	$content = $app['view']->make($layout)->nest('_content',$view->getName(), $view->getData())->render();
 
-		    } else
+		    }
+		    else
 		    {
 		    	//when response is returned without a view, we set no themes
 		    	$content = $view;
