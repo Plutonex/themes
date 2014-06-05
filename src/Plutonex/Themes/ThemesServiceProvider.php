@@ -91,11 +91,14 @@ class ThemesServiceProvider extends ServiceProvider {
 		$app = $this->app;
 		$this->app['router']->after(function($request, $response) use($ThemeLib, $app)
 		{
-			$themeRules = $this->app['px.themeConfig']->getThemeUriRules();
 
-			//Support AJAX and pJax
-			$HTTP_X_PJAX  = $request->server->get('HTTP_X_PJAX');
-			$AJAX = ($request->ajax()) ? TRUE : $HTTP_X_PJAX;
+			// Redirects have no content and errors should handle their own layout.
+			if ($response->getStatusCode() > 300) return;
+
+			//JsonResponse
+			if(is_a($response,'Illuminate\Http\JsonResponse')) return;
+
+			$themeRules = $this->app['px.themeConfig']->getThemeUriRules();
 
 			if(!empty($themeRules))
 			{
@@ -113,6 +116,9 @@ class ThemesServiceProvider extends ServiceProvider {
 				//if no rules are set, sets default theme
 				$app['px.themeConfig']->rulesApplied(false);
 
+				//Support AJAX and pJax
+				$HTTP_X_PJAX  = $request->server->get('HTTP_X_PJAX');
+				$AJAX         = ($request->ajax()) ? TRUE : $HTTP_X_PJAX;
 				$ajax_support = $app->config->get('pxTheme::config.ajax_support');
 
 				if ($AJAX && $ajax_support)
@@ -129,9 +135,6 @@ class ThemesServiceProvider extends ServiceProvider {
 			}
 
 			$layout = $ThemeLib->getLayoutPath();
-
-			// Redirects have no content and errors should handle their own layout.
-		    if ($response->getStatusCode() > 300) return;
 
 		    //get original view object
 		    $view = $response->getOriginalContent();
