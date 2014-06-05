@@ -22,12 +22,20 @@ class ThemesServiceProvider extends ServiceProvider
     {
         $this->package('plutonex/themes', 'pxTheme');
 
-        //set theme layout directory
-        $paths     = $this->app['config']->get('view.paths');
-        $themePath = $this->app->config->get('pxTheme::config.themes_path');
-        array_push($paths, $themePath);
-        $this->app['config']->set('view.paths', $paths);
 
+    }
+
+
+    public function boot()
+    {
+        $this->_binds();
+        $this->_viewEngineResolver();
+        $this->setFilter();
+    }
+
+
+    private function  _binds()
+    {
         //bind themeConfig object
         $this->app['px.themeConfig'] = $this->app->share(
            function ($app) {
@@ -42,6 +50,16 @@ class ThemesServiceProvider extends ServiceProvider
                return new ThemeManager($app['px.themeConfig']);
            }
         );
+    }
+
+    private function _viewEngineResolver()
+    {
+        //set theme layout directory
+        $paths     = $this->app['config']->get('view.paths');
+        $themePath = $this->app->config->get('pxTheme::config.themes_path');
+        array_push($paths, $themePath);
+        $this->app['config']->set('view.paths', $paths);
+
 
         //extend blade engine by adding @px.theme and @px.layout compile function
         $this->app['view.engine.resolver']->resolve('blade')->getCompiler()->extend(
@@ -66,16 +84,7 @@ class ThemesServiceProvider extends ServiceProvider
                return $view;
            }
         );
-
-
     }
-
-
-    public function boot()
-    {
-        $this->setFilter();
-    }
-
 
     /**
      * Get the services provided by the provider.
@@ -90,10 +99,8 @@ class ThemesServiceProvider extends ServiceProvider
 
     /**
      * Register Theme Filter
-     *
-     * @return [type] [description]
      */
-    protected function setFilter()
+    private function setFilter()
     {
         $ThemeLib = $this->app['px.theme'];
         $app      = $this->app;
