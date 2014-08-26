@@ -149,7 +149,7 @@ class ThemesServiceProvider extends ServiceProvider
 
                if (is_object($view)):
                    //we will render the view nested to the layout
-                   $content = $app['view']->make($layout)->nest('_content', $view->getName(), $view->getData())->render();
+                   $content = $app['view']->make($layout)->with($view->getData())->nest('_content', $view->getName())->render();
 
                else:
                    //when response is returned without a view, we set no themes
